@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Hábitos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FFFFFF;
+    --surface:#F4F4F7;
+    --ink:#1B1B20;
+    --ink-soft:#8A899A;
+    --ink-faint:#C7C6D1;
+    --accent:#F14C6D;
+
+    /* ===== ÁREAS DA VIDA — edite aqui ===== */
+    --saude:#F4698A;
+    --financas:#2FB88F;
+    --hobbies:#8B6EF2;
+    --estudos:#E3A82B;
+    --saude-mental:#4AC0B5;
+
+    --radius-xl:26px;
+    --radius-lg:20px;
+    --radius-md:14px;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family:'Manrope',system-ui,sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    overscroll-behavior:none;
+  }
+
+  #app{
+    max-width:430px;
+    margin:0 auto;
+    min-height:100vh;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    padding: calc(env(safe-area-inset-top) + 22px) 20px calc(env(safe-area-inset-bottom) + 100px) 20px;
+    position:relative;
+  }
+
+  .screen{ display:none; flex-direction:column; }
+  .screen.active{ display:flex; }
+
+  /* ---------- Header ---------- */
+  .header-row{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px; }
+  .greeting{ font-size:25px; font-weight:800; letter-spacing:-0.02em; margin:0; color:var(--ink); }
+  .greeting .accent{ color:var(--accent); }
+  .date-line{ font-size:13.5px; color:var(--ink-soft); margin-top:4px; font-weight:600; text-transform:capitalize; }
+  .header{ margin-bottom:22px; }
+
+  /* ---------- Mascote ---------- */
+  .mascot{ width:64px; height:64px; flex-shrink:0; margin-left:10px; }
+
+  /* ---------- Assistant / Rotina card ---------- */
+  .assistant-card{
+    background:var(--surface);
+    border-radius:var(--radius-lg);
+    padding:16px 18px;
+    margin-bottom:18px;
+  }
+  .assistant-label{ font-size:11px; font-weight:800; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.05em; margin:0 0 6px; }
+  .assistant-text{ font-size:14.5px; font-weight:600; color:var(--ink); margin:0 0 12px; line-height:1.4; }
+  .assistant-bar{ height:7px; border-radius:99px; background:#fff; overflow:hidden; }
+  .assistant-bar-fill{ height:100%; border-radius:99px; background:var(--accent); transition:width .25s ease; }
+
+  /* ---------- Áreas legend ---------- */
+  .section-label{ font-size:12.5px; font-weight:800; color:var(--ink-soft); margin:0 0 10px; }
+  .area-legend{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
+  .area-pill{
+    display:flex; align-items:center; gap:7px;
+    background:var(--surface); border-radius:999px; padding:8px 14px;
+    font-size:13px; font-weight:700; color:var(--ink);
+    cursor:pointer; transition:background .15s ease, color .15s ease; border:none; font-family:inherit;
+  }
+  .area-pill:active{ transform:scale(0.96); }
+  .area-pill .dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .area-pill.active{ color:#fff; }
+  .area-pill.active .dot{ background:#fff !important; }
+
+  .filtered-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:22px; }
+  .filtered-empty{ font-size:13px; color:var(--ink-faint); font-weight:600; padding:4px 2px 0; }
+
+  /* ---------- Shortcut cards ---------- */
+  .shortcut-row{ display:flex; gap:12px; }
+  .shortcut-card{
+    flex:1; background:var(--surface); border-radius:var(--radius-md);
+    padding:16px 14px; cursor:pointer; transition:transform .1s ease;
+  }
+  .shortcut-card:active{ transform:scale(0.97); }
+  .shortcut-icon{ width:34px; height:34px; border-radius:10px; background:var(--ink); display:flex; align-items:center; justify-content:center; margin-bottom:10px; }
+  .shortcut-icon svg{ width:17px; height:17px; }
+  .shortcut-title{ font-size:14px; font-weight:800; margin:0; }
+  .shortcut-sub{ font-size:12px; color:var(--ink-soft); font-weight:600; margin-top:2px; }
+
+  /* ---------- Day selector ---------- */
+  .day-row{ display:flex; justify-content:space-between; gap:6px; margin-bottom:22px; }
+  .day-pill{
+    flex:1; background:var(--surface); border-radius:16px; padding:10px 0 12px;
+    text-align:center; cursor:pointer; transition:background .15s ease, transform .1s ease;
+  }
+  .day-pill:active{ transform:scale(0.94); }
+  .day-pill .dow{ display:block; font-size:10.5px; color:var(--ink-soft); font-weight:700; text-transform:uppercase; letter-spacing:.03em; }
+  .day-pill .dom{ display:block; font-size:15px; font-weight:800; margin-top:4px; color:var(--ink); }
+  .day-pill.today .dow{ color:rgba(255,255,255,.75); }
+  .day-pill.today .dom{ color:#fff; }
+  .day-pill.selected{ background:var(--accent); }
+  .day-pill.selected .dow{ color:rgba(255,255,255,.75); }
+  .day-pill.selected .dom{ color:#fff; }
+  .day-pill.future{ opacity:.4; cursor:not-allowed; }
+
+  /* ---------- Blocks (Hoje) ---------- */
+  .block-list{ display:flex; flex-direction:column; gap:14px; }
+  .block-card{ border-radius:var(--radius-lg); padding:16px; }
+  .block-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .block-name{ font-size:13px; font-weight:800; color:var(--ink); text-transform:uppercase; letter-spacing:.04em; }
+  .block-count{ font-size:12px; font-weight:700; color:var(--ink-soft); }
+  .task-row{
+    display:flex; align-items:center; gap:12px;
+    background:#fff; border-radius:12px; padding:11px 12px;
+  }
+  .task-row + .task-row{ margin-top:8px; }
+  .task-check{
+    width:26px; height:26px; border-radius:50%; flex-shrink:0;
+    border:2px solid var(--ink-faint); background:transparent;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition:all .15s ease;
+  }
+  .task-check svg{ width:12px; height:12px; opacity:0; transition:opacity .12s ease; }
+  .task-check.checked svg{ opacity:1; }
+  .task-check:active{ transform:scale(0.9); }
+  .task-info{ flex:1; min-width:0; }
+  .task-name{ font-size:14.5px; font-weight:700; margin:0; color:var(--ink); }
+  .task-name.done{ text-decoration:line-through; color:var(--ink-faint); }
+  .task-tag{ display:flex; align-items:center; gap:5px; margin-top:3px; }
+  .task-tag .dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .task-tag span{ font-size:11.5px; color:var(--ink-soft); font-weight:600; }
+
+  .empty-note{ margin-top:18px; font-size:13px; color:var(--ink-faint); text-align:center; font-weight:600; }
+
+  /* ---------- Progress screen ---------- */
+  .chip-row{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:18px; scrollbar-width:none; }
+  .chip-row::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex-shrink:0; padding:9px 16px; border-radius:999px; background:var(--surface);
+    font-size:13px; font-weight:700; color:var(--ink-soft); cursor:pointer;
+    display:flex; align-items:center; gap:7px; transition:background .15s ease, color .15s ease;
+  }
+  .chip .dot{ width:8px; height:8px; border-radius:50%; }
+  .chip.active{ color:#fff; }
+
+  .detail-card{ border-radius:var(--radius-xl); padding:20px; color:#fff; margin-bottom:16px; }
+  .detail-top{ display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+  .detail-icon{ width:50px; height:50px; border-radius:15px; background:rgba(255,255,255,0.24); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .detail-icon svg{ width:25px; height:25px; }
+  .detail-name{ font-size:17px; font-weight:800; margin:0; }
+  .detail-area{ font-size:11.5px; font-weight:700; color:rgba(255,255,255,.75); margin-top:2px; text-transform:uppercase; letter-spacing:.03em; }
+  .detail-badge{ font-size:12px; font-weight:700; color:rgba(255,255,255,.85); margin-top:2px; }
+
+  .week-row{ display:flex; justify-content:space-between; margin-bottom:16px; }
+  .week-day{ display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; }
+  .week-day .wl{ font-size:10px; font-weight:700; color:rgba(255,255,255,.7); text-transform:uppercase; }
+  .week-dot{ width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,0.22); display:flex; align-items:center; justify-content:center; }
+  .week-dot.done{ background:#fff; }
+  .week-dot.done svg{ width:12px; height:12px; }
+  .week-dot.today-ring{ box-shadow:0 0 0 1.5px #fff; }
+
+  .bar-track{ height:8px; border-radius:99px; background:rgba(255,255,255,0.22); overflow:hidden; }
+  .bar-fill{ height:100%; background:#fff; border-radius:99px; transition:width .25s ease; }
+
+  .stat-row{ display:flex; gap:10px; margin:16px 0; }
+  .stat-card{ flex:1; background:var(--surface); border-radius:var(--radius-md); padding:14px 14px; }
+  .stat-num{ font-size:24px; font-weight:800; letter-spacing:-0.02em; color:var(--ink); }
+  .stat-label{ font-size:11.5px; color:var(--ink-soft); font-weight:700; margin-top:2px; }
+
+  /* ---------- Conquistas ---------- */
+  .badge-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:20px; }
+  .badge{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    background:var(--surface); border-radius:var(--radius-md); padding:12px 6px;
+    opacity:.35;
+  }
+  .badge.unlocked{ opacity:1; }
+  .badge-icon{ width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--ink-faint); }
+  .badge.unlocked .badge-icon{ background:var(--accent); }
+  .badge-icon svg{ width:15px; height:15px; }
+  .badge-label{ font-size:10.5px; font-weight:800; color:var(--ink-soft); text-align:center; }
+  .badge.unlocked .badge-label{ color:var(--ink); }
+
+  .cal-card{ background:var(--surface); border-radius:var(--radius-lg); padding:18px; }
+  .cal-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .cal-month{ font-size:14.5px; font-weight:800; color:var(--ink); text-transform:capitalize; }
+  .cal-arrow{ width:28px; height:28px; border-radius:50%; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; background:#fff; }
+  .cal-arrow svg{ width:12px; height:12px; }
+  .cal-arrow.disabled{ opacity:.3; pointer-events:none; }
+  .cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .cal-dow{ font-size:10px; font-weight:700; color:var(--ink-faint); text-align:center; padding-bottom:4px; }
+  .cal-day{ aspect-ratio:1; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700; color:var(--ink-faint); background:#fff; }
+  .cal-day.done{ color:#fff; }
+  .cal-day.today-outline{ box-shadow:inset 0 0 0 1.5px var(--ink); }
+  .cal-day.empty{ background:transparent; }
+
+  /* ---------- Bottom nav ---------- */
+  .tabbar{ position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:center; padding: 14px 20px calc(env(safe-area-inset-bottom) + 14px); pointer-events:none; }
+  .segmented{ pointer-events:auto; display:flex; background:#1B1B20; border-radius:999px; padding:6px; box-shadow:0 10px 28px rgba(0,0,0,0.22); gap:4px; }
+  .seg-btn{ display:flex; align-items:center; gap:7px; border:none; background:transparent; color:#8A899A; font-family:inherit; font-size:13.5px; font-weight:700; padding:11px 16px; border-radius:999px; cursor:pointer; transition:background .15s ease, color .15s ease; }
+  .seg-btn svg{ width:16px; height:16px; }
+  .seg-btn.active{ background:#fff; color:var(--ink); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ---------- INÍCIO ---------- -->
+  <div class="screen active" id="screen-inicio">
+    <div class="header-row">
+      <div>
+        <p class="greeting" id="greeting">Bom <span class="accent">dia</span></p>
+        <p class="date-line" id="date-line"></p>
+      </div>
+      <svg class="mascot" viewBox="0 0 120 120" fill="none">
+        <!-- sparkles -->
+        <path d="M14 22L16 27L21 29L16 31L14 36L12 31L7 29L12 27Z" fill="#E3A82B"/>
+        <path d="M102 80L103.5 84L107.5 85.5L103.5 87L102 91L100.5 87L96.5 85.5L100.5 84Z" fill="#F14C6D"/>
+        <circle cx="100" cy="24" r="3" fill="#8B6EF2"/>
+        <!-- tail -->
+        <path d="M86 86C96 84 100 72 94 64" stroke="#2B2A26" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- body -->
+        <ellipse cx="60" cy="78" rx="34" ry="28" fill="#F2D9B8" stroke="#2B2A26" stroke-width="2.5"/>
+        <!-- ears -->
+        <path d="M34 48L28 24L52 40Z" fill="#F2D9B8" stroke="#2B2A26" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M86 48L92 24L68 40Z" fill="#F2D9B8" stroke="#2B2A26" stroke-width="2.5" stroke-linejoin="round"/>
+        <path d="M36 42L33 29L47 39Z" fill="#F4A6BE"/>
+        <path d="M84 42L87 29L73 39Z" fill="#F4A6BE"/>
+        <!-- head -->
+        <circle cx="60" cy="54" r="30" fill="#F2D9B8" stroke="#2B2A26" stroke-width="2.5"/>
+        <!-- blush -->
+        <ellipse cx="42" cy="60" rx="6" ry="4" fill="#F4A6BE" opacity="0.8"/>
+        <ellipse cx="78" cy="60" rx="6" ry="4" fill="#F4A6BE" opacity="0.8"/>
+        <!-- eyes -->
+        <path d="M46 52C47.5 49 52 49 53.5 52" stroke="#2B2A26" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <path d="M66.5 52C68 49 72.5 49 74 52" stroke="#2B2A26" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <!-- nose + mouth -->
+        <path d="M58 60H62L60 63Z" fill="#2B2A26"/>
+        <path d="M60 63C60 66 57 67 55 65.5M60 63C60 66 63 67 65 65.5" stroke="#2B2A26" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <!-- whiskers -->
+        <path d="M20 58H34M20 64H33" stroke="#2B2A26" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M100 58H86M100 64H87" stroke="#2B2A26" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- paws holding cup -->
+        <ellipse cx="60" cy="98" rx="10" ry="7" fill="#2B2A26"/>
+        <rect x="52" y="90" width="16" height="12" rx="4" fill="#fff" stroke="#2B2A26" stroke-width="2"/>
+        <path d="M68 93C72 93 72 99 68 99" stroke="#2B2A26" stroke-width="2" fill="none"/>
+        <path d="M56 86C56 83 58 83 58 80M62 86C62 83 64 83 64 80" stroke="#E3A82B" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+      </svg>
+    </div>
+
+    <div class="assistant-card">
+      <p class="assistant-label">Rotina</p>
+      <p class="assistant-text" id="assistant-text"></p>
+      <div class="assistant-bar"><div class="assistant-bar-fill" id="assistant-bar-fill"></div></div>
+    </div>
+
+    <p class="section-label">suas áreas</p>
+    <div class="area-legend" id="area-legend"></div>
+    <div class="filtered-list" id="filtered-list"></div>
+
+    <div class="shortcut-row">
+      <div class="shortcut-card" data-goto="hoje">
+        <div class="shortcut-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <p class="shortcut-title">Tarefas de hoje</p>
+        <p class="shortcut-sub">Ver e marcar o dia</p>
+      </div>
+      <div class="shortcut-card" data-goto="progresso">
+        <div class="shortcut-icon">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 19V13M12 19V6M19 19V10" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </div>
+        <p class="shortcut-title">Progresso</p>
+        <p class="shortcut-sub">Streak e conquistas</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- HOJE ---------- -->
+  <div class="screen" id="screen-hoje">
+    <div class="header">
+      <p class="greeting">Hoje<span class="accent">.</span></p>
+      <p class="date-line" id="date-line-hoje"></p>
+    </div>
+
+    <div class="day-row" id="day-row"></div>
+
+    <div class="block-list" id="block-list"></div>
+    <p class="empty-note" id="future-note" style="display:none;">Ainda não chegou esse dia.</p>
+  </div>
+
+  <!-- ---------- PROGRESSO ---------- -->
+  <div class="screen" id="screen-progresso">
+    <div class="header">
+      <p class="greeting">Progr<span class="accent">esso</span></p>
+      <p class="date-line">Streak, histórico e conquistas</p>
+    </div>
+
+    <div class="chip-row" id="chip-row"></div>
+
+    <div class="detail-card" id="detail-card">
+      <div class="detail-top">
+        <div class="detail-icon" id="detail-icon"></div>
+        <div>
+          <p class="detail-name" id="detail-name"></p>
+          <p class="detail-area" id="detail-area"></p>
+          <p class="detail-badge" id="detail-badge"></p>
+        </div>
+      </div>
+      <div class="week-row" id="week-row"></div>
+      <div class="bar-track"><div class="bar-fill" id="bar-fill"></div></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-current">0</div>
+        <div class="stat-label">Streak atual</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-longest">0</div>
+        <div class="stat-label">Recorde</div>
+      </div>
+    </div>
+
+    <p class="section-label">conquistas</p>
+    <div class="badge-grid" id="badge-grid"></div>
+
+    <div class="cal-card">
+      <div class="cal-nav">
+        <button class="cal-arrow" id="cal-prev">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="#1B1B20" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div class="cal-month" id="cal-month"></div>
+        <button class="cal-arrow" id="cal-next">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="#1B1B20" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+  </div>
+
+  <!-- ---------- BOTTOM NAV ---------- -->
+  <div class="tabbar">
+    <div class="segmented">
+      <button class="seg-btn active" data-tab="inicio">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19H18V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Início
+      </button>
+      <button class="seg-btn" data-tab="hoje">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Hoje
+      </button>
+      <button class="seg-btn" data-tab="progresso">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 19V13M12 19V6M19 19V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Progresso
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* =====================================================================
+   CONFIG — edite aqui pra ajustar áreas, hábitos e blocos de horário
+   ===================================================================== */
+
+// ÁREAS DA VIDA
+const AREAS = [
+  { id:'saude',        name:'Saúde',         hex:'#F4698A' },
+  { id:'financas',     name:'Finanças',      hex:'#2FB88F' },
+  { id:'hobbies',      name:'Hobbies',       hex:'#8B6EF2' },
+  { id:'estudos',      name:'Estudos',       hex:'#E3A82B' },
+  { id:'saude_mental', name:'Saúde Mental',  hex:'#4AC0B5' },
+];
+
+// BLOCOS DE HORÁRIO DO DIA (genéricos por enquanto)
+const BLOCKS = [
+  { id:'manha', name:'Manhã' },
+  { id:'tarde', name:'Tarde' },
+  { id:'noite', name:'Noite' },
+];
+
+// HÁBITOS — cada um pertence a uma área e a um bloco de horário
+const HABITS = [
+  { id:'exercicio',  name:'Exercício',   areaId:'saude', blockId:'manha',
+    icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M6.5 8.5L6.5 15.5M17.5 8.5V15.5M3 10.5V13.5M21 10.5V13.5M6.5 12H17.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>' },
+  { id:'agua',       name:'2L de água',  areaId:'saude', blockId:'manha',
+    icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 3C12 3 6 10.5 6 14.5C6 18.09 8.69 21 12 21C15.31 21 18 18.09 18 14.5C18 10.5 12 3 12 3Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>' },
+  { id:'leitura',    name:'Leitura',     areaId:'hobbies', blockId:'tarde',
+    icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 6C10.3 4.7 7.8 4 5 4V17C7.8 17 10.3 17.7 12 19M12 6C13.7 4.7 16.2 4 19 4V17C16.2 17 13.7 17.7 12 19M12 6V19" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { id:'journaling', name:'Journaling',  areaId:'saude_mental', blockId:'noite',
+    icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M5 20H8.5L18 10.5C18.8 9.7 18.8 8.4 18 7.6L17 6.6C16.2 5.8 14.9 5.8 14.1 6.6L4.6 16.1C4.2 16.5 4 17 4 17.6V20H5Z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><path d="M12.5 8L16.5 12" stroke="#fff" stroke-width="1.6"/></svg>' },
+  { id:'gastos',     name:'Acompanhar gastos', areaId:'financas', blockId:'tarde',
+    frequency:'weekly', dow:6, // 6 = sábado
+    icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 4V20M8 7.5C8 7.5 9 6 12 6C15 6 16 7.8 16 9C16 12 8 11 8 14.5C8 16 9.5 17.5 12 17.5C15 17.5 16 16 16 16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>' },
+  { id:'compras',    name:'Sem compras impulsivas', areaId:'financas', blockId:'noite',
+    icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M6 8H18L17 20H7L6 8Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6C9 4.3 10.3 3 12 3C13.7 3 15 4.3 15 6V8" stroke="#fff" stroke-width="1.8"/><path d="M4 20L20 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>' },
+];
+
+// CONQUISTAS — marcos de streak (em dias)
+const MILESTONES = [3, 7, 14, 30];
+
+const DOW_LETTERS = ['D','S','T','Q','Q','S','S'];
+const DOW_SHORT   = ['dom','seg','ter','qua','qui','sex','sáb'];
+const MONTH_NAMES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+function areaOf(habit){ return AREAS.find(a=>a.id===habit.areaId); }
+function isScheduledOn(habit, date){
+  if(habit.frequency === 'weekly') return date.getDay() === habit.dow;
+  return true; // diário (padrão)
+}
+function gapOf(habit){ return habit.frequency === 'weekly' ? 7 : 1; }
+function streakLabel(habit, count){
+  if(count === 0) return habit.frequency === 'weekly' ? 'comece no próximo dia' : 'comece hoje';
+  if(habit.frequency === 'weekly') return `${count} semana${count>1?'s':''} seguidas`;
+  return `${count} dia${count>1?'s':''} seguidos`;
+}
+function hexToRgba(hex, alpha){
+  const h = hex.replace('#','');
+  const r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/* ============ STORAGE ============ */
+const STORE_KEY = 'habit_tracker_checks_v1';
+function loadChecks(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e){ return {}; } }
+function saveChecks(data){ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
+let checks = loadChecks();
+
+/* ============ DATE HELPERS ============ */
+function toKey(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
+function startOfDay(d){ const c=new Date(d); c.setHours(0,0,0,0); return c; }
+function isFuture(d){ return startOfDay(d) > startOfDay(new Date()); }
+function isSameDay(a,b){ return toKey(a)===toKey(b); }
+
+let selectedDate = startOfDay(new Date());
+let progressViewMonth = new Date();
+let activeHabitId = HABITS[0].id;
+
+/* ============ STREAKS ============ */
+function computeCurrentStreak(habitId){
+  const habit = HABITS.find(h=>h.id===habitId);
+  const gap = gapOf(habit);
+  let streak = 0;
+  let d = startOfDay(new Date());
+
+  if(habit.frequency === 'weekly'){
+    // volta pro dia-da-semana agendado mais recente (hoje incluso, se for o dia certo)
+    const diffToScheduled = (d.getDay() - habit.dow + 7) % 7;
+    d.setDate(d.getDate() - diffToScheduled);
+  }
+  const refKey = toKey(d);
+  const doneRef = !!(checks[refKey] && checks[refKey][habitId]);
+  if(!doneRef) d.setDate(d.getDate()-gap); // período de graça pro dia agendado atual
+
+  while(true){
+    const k = toKey(d);
+    if(checks[k] && checks[k][habitId]){ streak++; d.setDate(d.getDate()-gap); }
+    else break;
+  }
+  return streak;
+}
+function computeLongestStreak(habitId){
+  const habit = HABITS.find(h=>h.id===habitId);
+  const gap = gapOf(habit);
+  const dates = Object.keys(checks).filter(k => checks[k][habitId]).sort();
+  if(dates.length === 0) return 0;
+  let longest = 1, current = 1;
+  for(let i=1;i<dates.length;i++){
+    const diffDays = Math.round((new Date(dates[i]) - new Date(dates[i-1])) / 86400000);
+    current = diffDays === gap ? current+1 : 1;
+    longest = Math.max(longest, current);
+  }
+  return longest;
+}
+
+/* ============ INÍCIO ============ */
+function renderGreeting(){
+  const h = new Date().getHours();
+  const parts = h < 12 ? ['Bom','dia'] : h < 18 ? ['Boa','tarde'] : ['Boa','noite'];
+  document.getElementById('greeting').innerHTML = `${parts[0]} <span class="accent">${parts[1]}</span>`;
+  const opts = { weekday:'long', day:'numeric', month:'long' };
+  const today = new Date();
+  document.getElementById('date-line').textContent = today.toLocaleDateString('pt-BR', opts);
+  document.getElementById('date-line-hoje').textContent = selectedDate.toLocaleDateString('pt-BR', opts);
+}
+
+function renderAssistantCard(){
+  const today = new Date();
+  const todayKey = toKey(today);
+  const dayChecks = checks[todayKey] || {};
+  const todayHabits = HABITS.filter(h=>isScheduledOn(h, today));
+  const total = todayHabits.length;
+  const done = todayHabits.filter(h=>dayChecks[h.id]).length;
+  const text = done === 0
+    ? `Você tem ${total} hábitos pra hoje. Bora começar? ✨`
+    : done === total
+    ? `Mandou bem! Todos os ${total} hábitos concluídos hoje 🎉`
+    : `Você concluiu ${done} de ${total} hábitos hoje ✨`;
+  document.getElementById('assistant-text').textContent = text;
+  document.getElementById('assistant-bar-fill').style.width = Math.round((done/total)*100) + '%';
+}
+
+let activeAreaFilter = null;
+
+function renderAreaLegend(){
+  const el = document.getElementById('area-legend');
+  el.innerHTML = '';
+  AREAS.forEach(a=>{
+    const active = activeAreaFilter === a.id;
+    const pill = document.createElement('button');
+    pill.className = 'area-pill' + (active?' active':'');
+    if(active) pill.style.background = a.hex;
+    pill.innerHTML = `<span class="dot" style="background:${a.hex}"></span>${a.name}`;
+    pill.addEventListener('click', ()=>{
+      activeAreaFilter = active ? null : a.id;
+      renderAreaLegend();
+      renderFilteredList();
+    });
+    el.appendChild(pill);
+  });
+}
+
+function renderFilteredList(){
+  const el = document.getElementById('filtered-list');
+  el.innerHTML = '';
+  if(!activeAreaFilter) return;
+
+  const today = new Date();
+  const todayKey = toKey(today);
+  const dayChecks = checks[todayKey] || {};
+  const habitsInArea = HABITS.filter(h=>h.areaId===activeAreaFilter && isScheduledOn(h, today));
+
+  if(habitsInArea.length===0){
+    const area = AREAS.find(a=>a.id===activeAreaFilter);
+    el.innerHTML = `<p class="filtered-empty">Nenhum hábito de "${area.name}" pra hoje.</p>`;
+    return;
+  }
+
+  habitsInArea.forEach(h=>{
+    const area = areaOf(h);
+    const isChecked = !!dayChecks[h.id];
+    const streak = computeCurrentStreak(h.id);
+    const row = document.createElement('div');
+    row.className = 'task-row';
+    row.innerHTML = `
+      <button class="task-check ${isChecked?'checked':''}" data-habit="${h.id}" style="${isChecked?`background:${area.hex};border-color:${area.hex}`:''}">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="task-info">
+        <p class="task-name ${isChecked?'done':''}">${h.name}</p>
+        <div class="task-tag">
+          <span class="dot" style="background:${area.hex}"></span>
+          <span>${streakLabel(h, streak)}</span>
+        </div>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+
+  el.querySelectorAll('.task-check').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const habitId = btn.dataset.habit;
+      const k = toKey(new Date());
+      if(!checks[k]) checks[k] = {};
+      checks[k][habitId] = !checks[k][habitId];
+      if(!checks[k][habitId]) delete checks[k][habitId];
+      saveChecks(checks);
+      renderFilteredList();
+      renderAssistantCard();
+    });
+  });
+}
+
+function renderInicio(){
+  renderGreeting();
+  renderAssistantCard();
+  renderAreaLegend();
+  renderFilteredList();
+}
+
+/* ============ HOJE ============ */
+function renderDayRow(){
+  const row = document.getElementById('day-row');
+  row.innerHTML = '';
+  const today = startOfDay(new Date());
+  const dow = today.getDay();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - dow);
+
+  for(let i=0;i<7;i++){
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate()+i);
+    const pill = document.createElement('div');
+    pill.className = 'day-pill';
+    if(isSameDay(d, today)) pill.classList.add('today');
+    if(isSameDay(d, selectedDate)) pill.classList.add('selected');
+    if(isFuture(d)) pill.classList.add('future');
+    pill.innerHTML = `<span class="dow">${DOW_LETTERS[d.getDay()]}</span><span class="dom">${d.getDate()}</span>`;
+    if(!isFuture(d)){
+      pill.addEventListener('click', ()=>{
+        selectedDate = startOfDay(d);
+        renderHoje();
+      });
+    }
+    row.appendChild(pill);
+  }
+}
+
+function renderBlocks(){
+  const list = document.getElementById('block-list');
+  list.innerHTML = '';
+  const key = toKey(selectedDate);
+  const dayChecks = checks[key] || {};
+
+  BLOCKS.forEach(block=>{
+    const blockHabits = HABITS.filter(h=>h.blockId===block.id && isScheduledOn(h, selectedDate));
+    if(blockHabits.length===0) return;
+
+    const doneCount = blockHabits.filter(h=>dayChecks[h.id]).length;
+    const dominantArea = areaOf(blockHabits[0]);
+
+    const card = document.createElement('div');
+    card.className = 'block-card';
+    card.style.background = hexToRgba(dominantArea.hex, 0.12);
+
+    let rowsHtml = '';
+    blockHabits.forEach(h=>{
+      const area = areaOf(h);
+      const isChecked = !!dayChecks[h.id];
+      const streak = computeCurrentStreak(h.id);
+      rowsHtml += `
+        <div class="task-row">
+          <button class="task-check ${isChecked?'checked':''}" data-habit="${h.id}" style="${isChecked?`background:${area.hex};border-color:${area.hex}`:''}">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="task-info">
+            <p class="task-name ${isChecked?'done':''}">${h.name}</p>
+            <div class="task-tag">
+              <span class="dot" style="background:${area.hex}"></span>
+              <span>${area.name} · ${streakLabel(h, streak)}</span>
+            </div>
+          </div>
+        </div>`;
+    });
+
+    card.innerHTML = `
+      <div class="block-top">
+        <span class="block-name">${block.name}</span>
+        <span class="block-count">${doneCount}/${blockHabits.length}</span>
+      </div>
+      ${rowsHtml}
+    `;
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll('.task-check').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const habitId = btn.dataset.habit;
+      const k = toKey(selectedDate);
+      if(!checks[k]) checks[k] = {};
+      checks[k][habitId] = !checks[k][habitId];
+      if(!checks[k][habitId]) delete checks[k][habitId];
+      saveChecks(checks);
+      renderBlocks();
+      renderAssistantCard();
+      if(document.getElementById('screen-progresso').classList.contains('active')) renderProgresso();
+    });
+  });
+}
+
+function renderHoje(){
+  renderGreeting();
+  renderDayRow();
+  renderBlocks();
+}
+
+/* ============ PROGRESSO ============ */
+function renderChips(){
+  const row = document.getElementById('chip-row');
+  row.innerHTML = '';
+  HABITS.forEach(h=>{
+    const area = areaOf(h);
+    const chip = document.createElement('div');
+    const active = h.id===activeHabitId;
+    chip.className = 'chip' + (active ? ' active' : '');
+    if(active) chip.style.background = area.hex;
+    chip.innerHTML = `<span class="dot" style="background:${active?'#fff':area.hex}"></span>${h.name}`;
+    chip.addEventListener('click', ()=>{ activeHabitId = h.id; renderProgresso(); });
+    row.appendChild(chip);
+  });
+}
+
+function renderDetailCard(){
+  const habit = HABITS.find(h=>h.id===activeHabitId);
+  const area = areaOf(habit);
+  const card = document.getElementById('detail-card');
+  card.style.background = area.hex;
+  document.getElementById('detail-icon').innerHTML = habit.icon;
+  document.getElementById('detail-name').textContent = habit.name;
+  document.getElementById('detail-area').textContent = area.name;
+
+  const streak = computeCurrentStreak(habit.id);
+  document.getElementById('detail-badge').textContent = streakLabel(habit, streak);
+
+  const today = startOfDay(new Date());
+  const dow = today.getDay();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate()-dow);
+  const weekRow = document.getElementById('week-row');
+  weekRow.innerHTML = '';
+  let doneThisWeek = 0, elapsedThisWeek = 0;
+
+  for(let i=0;i<7;i++){
+    const d = new Date(weekStart);
+    d.setDate(weekStart.getDate()+i);
+    const scheduled = isScheduledOn(habit, d);
+    const future = isFuture(d);
+    const done = !!(checks[toKey(d)] && checks[toKey(d)][habit.id]);
+    if(scheduled && !future) elapsedThisWeek++;
+    if(scheduled && done) doneThisWeek++;
+
+    const cell = document.createElement('div');
+    cell.className = 'week-day';
+    cell.style.opacity = scheduled ? '1' : '0.3';
+    cell.innerHTML = `
+      <span class="wl">${DOW_SHORT[d.getDay()][0]}</span>
+      <div class="week-dot ${done?'done':''} ${isSameDay(d,today)?'today-ring':''}">
+        ${done ? `<svg viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="${area.hex}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
+      </div>
+    `;
+    weekRow.appendChild(cell);
+  }
+
+  const pct = elapsedThisWeek>0 ? Math.round((doneThisWeek/elapsedThisWeek)*100) : 0;
+  document.getElementById('bar-fill').style.width = pct + '%';
+}
+
+function renderStats(){
+  document.getElementById('stat-current').textContent = computeCurrentStreak(activeHabitId);
+  document.getElementById('stat-longest').textContent = computeLongestStreak(activeHabitId);
+}
+
+function renderBadges(){
+  const longest = computeLongestStreak(activeHabitId);
+  const grid = document.getElementById('badge-grid');
+  grid.innerHTML = '';
+  MILESTONES.forEach(m=>{
+    const unlocked = longest >= m;
+    const badge = document.createElement('div');
+    badge.className = 'badge' + (unlocked?' unlocked':'');
+    badge.innerHTML = `
+      <div class="badge-icon">
+        ${unlocked
+          ? '<svg viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+          : '<svg viewBox="0 0 24 24" fill="none"><rect x="6" y="10" width="12" height="9" rx="2" stroke="#fff" stroke-width="2"/><path d="M8 10V7a4 4 0 018 0v3" stroke="#fff" stroke-width="2"/></svg>'}
+      </div>
+      <span class="badge-label">${m} dias</span>
+    `;
+    grid.appendChild(badge);
+  });
+}
+
+function renderCalendar(){
+  const year = progressViewMonth.getFullYear();
+  const month = progressViewMonth.getMonth();
+  document.getElementById('cal-month').textContent = `${MONTH_NAMES[month]} ${year}`;
+
+  const today = startOfDay(new Date());
+  const isCurrentMonth = (year===today.getFullYear() && month===today.getMonth());
+  document.getElementById('cal-next').classList.toggle('disabled', isCurrentMonth);
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+  DOW_LETTERS.forEach(l=>{
+    const el = document.createElement('div');
+    el.className = 'cal-dow';
+    el.textContent = l;
+    grid.appendChild(el);
+  });
+
+  const firstDay = new Date(year, month, 1);
+  const startOffset = firstDay.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+
+  for(let i=0;i<startOffset;i++){
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    grid.appendChild(el);
+  }
+
+  const habit = HABITS.find(h=>h.id===activeHabitId);
+  const area = areaOf(habit);
+
+  for(let day=1; day<=daysInMonth; day++){
+    const d = new Date(year, month, day);
+    const key = toKey(d);
+    const done = !!(checks[key] && checks[key][activeHabitId]);
+    const future = isFuture(d);
+
+    const el = document.createElement('div');
+    el.className = 'cal-day' + (done?' done':'') + (isSameDay(d, today)?' today-outline':'');
+    if(done) el.style.background = area.hex;
+    if(future) el.style.opacity = '0.35';
+    el.textContent = day;
+    grid.appendChild(el);
+  }
+}
+
+function renderProgresso(){
+  renderChips();
+  renderDetailCard();
+  renderStats();
+  renderBadges();
+  renderCalendar();
+}
+
+/* ============ NAV ============ */
+function goToTab(tab){
+  document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.getElementById('screen-inicio').classList.toggle('active', tab==='inicio');
+  document.getElementById('screen-hoje').classList.toggle('active', tab==='hoje');
+  document.getElementById('screen-progresso').classList.toggle('active', tab==='progresso');
+  if(tab==='hoje') renderHoje();
+  if(tab==='progresso') renderProgresso();
+  if(tab==='inicio') renderInicio();
+}
+
+document.querySelectorAll('.seg-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> goToTab(btn.dataset.tab));
+});
+document.querySelectorAll('.shortcut-card').forEach(card=>{
+  card.addEventListener('click', ()=> goToTab(card.dataset.goto));
+});
+
+document.getElementById('cal-prev').addEventListener('click', ()=>{
+  progressViewMonth.setMonth(progressViewMonth.getMonth()-1);
+  renderCalendar();
+});
+document.getElementById('cal-next').addEventListener('click', ()=>{
+  const today = new Date();
+  const isCurrentMonth = (progressViewMonth.getFullYear()===today.getFullYear() && progressViewMonth.getMonth()===today.getMonth());
+  if(isCurrentMonth) return;
+  progressViewMonth.setMonth(progressViewMonth.getMonth()+1);
+  renderCalendar();
+});
+
+/* ============ INIT ============ */
+renderInicio();
+</script>
+</body>
+</html>
