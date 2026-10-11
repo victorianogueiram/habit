@@ -145,9 +145,14 @@
   .task-info{ flex:1; min-width:0; }
   .task-name{ font-size:14.5px; font-weight:700; margin:0; color:var(--ink); }
   .task-name.done{ text-decoration:line-through; color:var(--ink-faint); }
-  .task-tag{ display:flex; align-items:center; gap:5px; margin-top:3px; }
+  .task-tag{ display:flex; align-items:center; flex-wrap:wrap; gap:3px 6px; margin-top:3px; }
   .task-tag .dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
   .task-tag span{ font-size:11.5px; color:var(--ink-soft); font-weight:600; }
+  .task-tag .sep{ color:var(--ink-faint); }
+  .task-tag .repeat{ display:inline-flex; align-items:center; gap:4px; }
+  .repeat-icon{ width:11px; height:11px; flex-shrink:0; }
+  .count-badge{ flex-shrink:0; font-size:12px; font-weight:800; color:var(--ink); background:var(--surface); border-radius:99px; padding:5px 10px; }
+  .count-badge.full{ background:var(--ink); color:#fff; }
 
   .empty-note{ margin-top:18px; font-size:13px; color:var(--ink-faint); text-align:center; font-weight:600; }
 
@@ -219,6 +224,25 @@
   .seg-btn{ display:flex; align-items:center; gap:7px; border:none; background:transparent; color:#8A899A; font-family:inherit; font-size:13.5px; font-weight:700; padding:11px 16px; border-radius:999px; cursor:pointer; transition:background .15s ease, color .15s ease; }
   .seg-btn svg{ width:16px; height:16px; }
   .seg-btn.active{ background:#fff; color:var(--ink); }
+  .seg-btn:not(.active){ padding:11px 13px; }
+  .seg-btn:not(.active) .seg-label{ display:none; }
+
+  /* ---------- Metas ---------- */
+  .quarter-card{ background:var(--surface); border-radius:var(--radius-lg); padding:16px 18px; margin-bottom:20px; }
+  .quarter-top{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; }
+  .quarter-title{ font-size:14.5px; font-weight:800; margin:0; }
+  .quarter-days{ font-size:12.5px; font-weight:700; color:var(--ink-soft); }
+  .quarter-bar{ height:7px; border-radius:99px; background:#fff; overflow:hidden; }
+  .quarter-bar-fill{ height:100%; border-radius:99px; background:var(--accent); transition:width .25s ease; }
+  .quarter-note{ font-size:12px; font-weight:600; color:var(--ink-soft); margin:10px 0 0; }
+
+  .goal-list{ display:flex; flex-direction:column; gap:14px; margin-bottom:24px; }
+  .goal-card{ border-radius:var(--radius-lg); padding:18px; }
+  .goal-title{ display:flex; align-items:center; gap:9px; font-size:15.5px; font-weight:800; margin:0 0 12px; line-height:1.3; }
+  .goal-title .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+  .goal-items{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px; }
+  .goal-items li{ display:flex; gap:10px; font-size:14px; font-weight:600; line-height:1.4; color:var(--ink); background:#fff; border-radius:12px; padding:11px 12px; }
+  .goal-items li::before{ content:''; width:6px; height:6px; border-radius:50%; background:var(--bullet, var(--ink-faint)); margin-top:7px; flex-shrink:0; }
 </style>
 </head>
 <body>
@@ -358,20 +382,46 @@
     </div>
   </div>
 
+  <!-- ---------- METAS ---------- -->
+  <div class="screen" id="screen-metas">
+    <div class="header">
+      <p class="greeting">Metas<span class="accent">.</span></p>
+      <p class="date-line" id="metas-subtitle">Metas para o Q4/26</p>
+    </div>
+
+    <div class="quarter-card">
+      <div class="quarter-top">
+        <p class="quarter-title">2026: Q4 Vision</p>
+        <span class="quarter-days" id="quarter-days"></span>
+      </div>
+      <div class="quarter-bar"><div class="quarter-bar-fill" id="quarter-bar-fill"></div></div>
+      <p class="quarter-note">Q4 finaliza em 31 de dezembro.</p>
+    </div>
+
+    <div class="goal-list" id="goal-list"></div>
+
+    <p class="section-label">secondary goals</p>
+    <div class="goal-list" id="secondary-list"></div>
+  </div>
+
   <!-- ---------- BOTTOM NAV ---------- -->
   <div class="tabbar">
     <div class="segmented">
       <button class="seg-btn active" data-tab="inicio">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 11L12 4L20 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10V19H18V10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Início
+<span class="seg-label">Início</span>
       </button>
       <button class="seg-btn" data-tab="hoje">
         <svg viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Hoje
+<span class="seg-label">Hoje</span>
       </button>
       <button class="seg-btn" data-tab="progresso">
         <svg viewBox="0 0 24 24" fill="none"><path d="M5 19V13M12 19V6M19 19V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        Progresso
+<span class="seg-label">Progresso</span>
+      </button>
+      <button class="seg-btn" data-tab="metas">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="1" fill="currentColor"/></svg>
+        <span class="seg-label">Metas</span>
       </button>
     </div>
   </div>
@@ -401,8 +451,11 @@ const BLOCKS = [
 
 // HÁBITOS — cada um pertence a uma área e a um bloco de horário
 const HABITS = [
-  { id:'exercicio',  name:'Exercício',   areaId:'saude', blockId:'manha',
-    icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M6.5 8.5L6.5 15.5M17.5 8.5V15.5M3 10.5V13.5M21 10.5V13.5M6.5 12H17.5" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>' },
+  { id:'exercicio',  name:'Caminhar 20 minutos', areaId:'saude', blockId:'manha',
+    icon:'<svg viewBox="0 0 24 24" fill="none"><circle cx="13" cy="4.5" r="1.8" fill="#fff"/><path d="M13 8.5L10.5 13L13.5 16L13 21M10.5 13L7.5 15M12.5 10.5L16 12.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
+  { id:'academia',   name:'Ir na academia', areaId:'saude', blockId:'manha',
+    frequency:'times', target:3, // aparece todo dia até bater 3x na semana (dom–sáb)
+    icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M9 8.5C9 5.5 15 5.5 15 8.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="14.5" r="5.5" stroke="#fff" stroke-width="1.8"/></svg>' },
   { id:'agua',       name:'2L de água',  areaId:'saude', blockId:'manha',
     icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 3C12 3 6 10.5 6 14.5C6 18.09 8.69 21 12 21C15.31 21 18 18.09 18 14.5C18 10.5 12 3 12 3Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>' },
   { id:'leitura',    name:'Leitura',     areaId:'hobbies', blockId:'tarde',
@@ -416,6 +469,40 @@ const HABITS = [
     icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M6 8H18L17 20H7L6 8Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6C9 4.3 10.3 3 12 3C13.7 3 15 4.3 15 6V8" stroke="#fff" stroke-width="1.8"/><path d="M4 20L20 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>' },
 ];
 
+// METAS DO TRIMESTRE — por enquanto só consulta (sem check)
+const QUARTER_LABEL = 'Q4/26';
+const QUARTER_START = new Date(2026, 9, 1);   // 1 out
+const QUARTER_END   = new Date(2026, 11, 31); // 31 dez
+
+const GOALS = [
+  { title:'melhorar minha saúde física', areaId:'saude', items:[
+    'ir na academia 3x na semana.',
+    'fazer caminhadas diárias de, ao menos, 20 minutos.',
+    'meditar diariamente, ao menos, 5 minutos.',
+    'comer uma fruta ao dia, seja fresca ou batida.',
+  ]},
+  { title:'me conectar comigo mesma, através de registros', areaId:'saude_mental', items:[
+    'documentar minha vida! tirar mais fotos e vídeos.',
+    'rastrear minhas experiências, refletir e revisar regularmente.',
+    'expandir outras formas de conexão e autoconhecimento.',
+  ]},
+  { title:'fomentar meus recursos', areaId:'financas', items:[
+    'guardar, ao menos, duzentos reais por mês.',
+    'desenvolver um método de organizar meu dinheiro.',
+    'ser intencional em todas as minhas compras.',
+    'visualizar o ato de me exercitar e comer bem, como um recurso para viver novas experiências.',
+  ]},
+];
+
+const SECONDARY_GOALS = [
+  { title:'ler mais livros', areaId:'hobbies', items:[
+    'ler mais livros, apenas por ler coisas que eu goste.',
+  ]},
+  { title:'sair de casa com mais intenção', areaId:'hobbies', items:[
+    'sair de casa com mais intenção. viver as coisas que eu vivo quando estou com outras pessoas.',
+  ]},
+];
+
 // CONQUISTAS — marcos de streak (em dias)
 const MILESTONES = [3, 7, 14, 30];
 
@@ -424,15 +511,66 @@ const DOW_SHORT   = ['dom','seg','ter','qua','qui','sex','sáb'];
 const MONTH_NAMES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 
 function areaOf(habit){ return AREAS.find(a=>a.id===habit.areaId); }
+function weekStartOf(date){ const d = new Date(date); d.setHours(0,0,0,0); d.setDate(d.getDate() - d.getDay()); return d; }
+// quantos checks o hábito tem na semana (dom–sáb) de `date`; inclusive=false não conta o próprio dia
+function weekCount(habit, date, inclusive){
+  const end = new Date(date); end.setHours(0,0,0,0);
+  const d = weekStartOf(date);
+  let n = 0;
+  while(inclusive ? d <= end : d < end){
+    const k = toKey(d);
+    if(checks[k] && checks[k][habit.id]) n++;
+    d.setDate(d.getDate()+1);
+  }
+  return n;
+}
 function isScheduledOn(habit, date){
   if(habit.frequency === 'weekly') return date.getDay() === habit.dow;
+  if(habit.frequency === 'times'){
+    const k = toKey(date);
+    const doneToday = !!(checks[k] && checks[k][habit.id]);
+    return doneToday || weekCount(habit, date, false) < habit.target;
+  }
   return true; // diário (padrão)
 }
+function isWeeklyUnit(habit){ return habit.frequency === 'weekly' || habit.frequency === 'times'; }
 function gapOf(habit){ return habit.frequency === 'weekly' ? 7 : 1; }
 function streakLabel(habit, count){
-  if(count === 0) return habit.frequency === 'weekly' ? 'comece no próximo dia' : 'comece hoje';
-  if(habit.frequency === 'weekly') return `${count} semana${count>1?'s':''} seguidas`;
+  if(count === 0){
+    if(habit.frequency === 'times') return 'comece essa semana';
+    return habit.frequency === 'weekly' ? 'comece no próximo dia' : 'comece hoje';
+  }
+  if(isWeeklyUnit(habit)) return `${count} semana${count>1?'s':''} seguidas`;
   return `${count} dia${count>1?'s':''} seguidos`;
+}
+function countBadge(habit, date){
+  if(habit.frequency !== 'times') return '';
+  const n = weekCount(habit, date, true);
+  return `<span class="count-badge ${n>=habit.target?'full':''}">${n}/${habit.target}</span>`;
+}
+// semanas (início dom) → nº de checks, pra hábitos "Nx por semana"
+function weeksMap(habit){
+  const map = {};
+  Object.keys(checks).forEach(k=>{
+    if(checks[k][habit.id]){
+      const ws = toKey(weekStartOf(new Date(k + 'T00:00:00')));
+      map[ws] = (map[ws] || 0) + 1;
+    }
+  });
+  return map;
+}
+const DOW_FULL = ['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+const REPEAT_ICON = '<svg class="repeat-icon" viewBox="0 0 24 24" fill="none"><path d="M17 2L21 6L17 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11V10C3 8.3 4.3 7 6 7H21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7 22L3 18L7 14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 13V14C21 15.7 19.7 17 18 17H3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+function repeatLabel(habit){
+  if(habit.frequency === 'times') return `${habit.target}x na semana`;
+  if(habit.frequency === 'weekly'){
+    const d = DOW_FULL[habit.dow];
+    return (habit.dow === 0 || habit.dow === 6) ? `todo ${d}` : `toda ${d}`;
+  }
+  return 'todo dia';
+}
+function repeatTag(habit){
+  return `<span class="repeat">${REPEAT_ICON}${repeatLabel(habit)}</span>`;
 }
 function hexToRgba(hex, alpha){
   const h = hex.replace('#','');
@@ -459,6 +597,14 @@ let activeHabitId = HABITS[0].id;
 /* ============ STREAKS ============ */
 function computeCurrentStreak(habitId){
   const habit = HABITS.find(h=>h.id===habitId);
+  if(habit.frequency === 'times'){
+    const map = weeksMap(habit);
+    const d = weekStartOf(new Date());
+    if((map[toKey(d)] || 0) < habit.target) d.setDate(d.getDate()-7); // semana atual ainda em andamento
+    let s = 0;
+    while((map[toKey(d)] || 0) >= habit.target){ s++; d.setDate(d.getDate()-7); }
+    return s;
+  }
   const gap = gapOf(habit);
   let streak = 0;
   let d = startOfDay(new Date());
@@ -481,6 +627,18 @@ function computeCurrentStreak(habitId){
 }
 function computeLongestStreak(habitId){
   const habit = HABITS.find(h=>h.id===habitId);
+  if(habit.frequency === 'times'){
+    const map = weeksMap(habit);
+    const weeks = Object.keys(map).filter(k=>map[k] >= habit.target).sort();
+    if(weeks.length === 0) return 0;
+    let best = 1, cur = 1;
+    for(let i=1;i<weeks.length;i++){
+      const diff = Math.round((new Date(weeks[i]) - new Date(weeks[i-1])) / 86400000);
+      cur = diff === 7 ? cur+1 : 1;
+      best = Math.max(best, cur);
+    }
+    return best;
+  }
   const gap = gapOf(habit);
   const dates = Object.keys(checks).filter(k => checks[k][habitId]).sort();
   if(dates.length === 0) return 0;
@@ -570,9 +728,14 @@ function renderFilteredList(){
         <p class="task-name ${isChecked?'done':''}">${h.name}</p>
         <div class="task-tag">
           <span class="dot" style="background:${area.hex}"></span>
+          <span>${area.name}</span>
+          <span class="sep">·</span>
+          ${repeatTag(h)}
+          <span class="sep">·</span>
           <span>${streakLabel(h, streak)}</span>
         </div>
       </div>
+      ${countBadge(h, today)}
     `;
     el.appendChild(row);
   });
@@ -657,9 +820,14 @@ function renderBlocks(){
             <p class="task-name ${isChecked?'done':''}">${h.name}</p>
             <div class="task-tag">
               <span class="dot" style="background:${area.hex}"></span>
-              <span>${area.name} · ${streakLabel(h, streak)}</span>
+              <span>${area.name}</span>
+              <span class="sep">·</span>
+              ${repeatTag(h)}
+              <span class="sep">·</span>
+              <span>${streakLabel(h, streak)}</span>
             </div>
           </div>
+          ${countBadge(h, selectedDate)}
         </div>`;
     });
 
@@ -733,7 +901,7 @@ function renderDetailCard(){
   for(let i=0;i<7;i++){
     const d = new Date(weekStart);
     d.setDate(weekStart.getDate()+i);
-    const scheduled = isScheduledOn(habit, d);
+    const scheduled = habit.frequency === 'times' ? true : isScheduledOn(habit, d);
     const future = isFuture(d);
     const done = !!(checks[toKey(d)] && checks[toKey(d)][habit.id]);
     if(scheduled && !future) elapsedThisWeek++;
@@ -751,7 +919,8 @@ function renderDetailCard(){
     weekRow.appendChild(cell);
   }
 
-  const pct = elapsedThisWeek>0 ? Math.round((doneThisWeek/elapsedThisWeek)*100) : 0;
+  let pct = elapsedThisWeek>0 ? Math.round((doneThisWeek/elapsedThisWeek)*100) : 0;
+  if(habit.frequency === 'times') pct = Math.min(100, Math.round((doneThisWeek/habit.target)*100));
   document.getElementById('bar-fill').style.width = pct + '%';
 }
 
@@ -774,7 +943,7 @@ function renderBadges(){
           ? '<svg viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'
           : '<svg viewBox="0 0 24 24" fill="none"><rect x="6" y="10" width="12" height="9" rx="2" stroke="#fff" stroke-width="2"/><path d="M8 10V7a4 4 0 018 0v3" stroke="#fff" stroke-width="2"/></svg>'}
       </div>
-      <span class="badge-label">${m} dias</span>
+      <span class="badge-label">${m} ${isWeeklyUnit(HABITS.find(h=>h.id===activeHabitId)) ? 'semanas' : 'dias'}</span>
     `;
     grid.appendChild(badge);
   });
@@ -834,12 +1003,45 @@ function renderProgresso(){
   renderCalendar();
 }
 
+/* ============ METAS ============ */
+function renderGoalCards(list, targetId){
+  const el = document.getElementById(targetId);
+  el.innerHTML = '';
+  list.forEach(g=>{
+    const area = AREAS.find(a=>a.id===g.areaId);
+    const card = document.createElement('div');
+    card.className = 'goal-card';
+    card.style.background = hexToRgba(area.hex, 0.12);
+    card.style.setProperty('--bullet', area.hex);
+    card.innerHTML = `
+      <p class="goal-title"><span class="dot" style="background:${area.hex}"></span>${g.title}</p>
+      <ul class="goal-items">${g.items.map(i=>`<li>${i}</li>`).join('')}</ul>
+    `;
+    el.appendChild(card);
+  });
+}
+
+function renderMetas(){
+  document.getElementById('metas-subtitle').textContent = `Metas para o ${QUARTER_LABEL}`;
+  const today = startOfDay(new Date());
+  const total = Math.round((QUARTER_END - QUARTER_START) / 86400000) + 1;
+  const elapsed = Math.min(total, Math.max(0, Math.round((today - QUARTER_START) / 86400000) + 1));
+  const left = Math.max(0, Math.round((QUARTER_END - today) / 86400000));
+  document.getElementById('quarter-days').textContent =
+    today > QUARTER_END ? 'trimestre encerrado' : `${left} dia${left===1?'':'s'} restantes`;
+  document.getElementById('quarter-bar-fill').style.width = Math.round((elapsed/total)*100) + '%';
+  renderGoalCards(GOALS, 'goal-list');
+  renderGoalCards(SECONDARY_GOALS, 'secondary-list');
+}
+
 /* ============ NAV ============ */
 function goToTab(tab){
   document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
   document.getElementById('screen-inicio').classList.toggle('active', tab==='inicio');
   document.getElementById('screen-hoje').classList.toggle('active', tab==='hoje');
   document.getElementById('screen-progresso').classList.toggle('active', tab==='progresso');
+  document.getElementById('screen-metas').classList.toggle('active', tab==='metas');
+  if(tab==='metas') renderMetas();
   if(tab==='hoje') renderHoje();
   if(tab==='progresso') renderProgresso();
   if(tab==='inicio') renderInicio();
