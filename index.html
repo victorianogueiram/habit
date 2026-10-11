@@ -80,7 +80,7 @@
   /* ---------- Áreas legend ---------- */
   .section-label{ font-size:12.5px; font-weight:800; color:var(--ink-soft); margin:0 0 10px; }
   .area-legend{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
-  .area-pill{
+  .area-pill{text-transform:lowercase;font-weight:400 !important;
     display:flex; align-items:center; gap:7px;
     background:var(--surface); border-radius:999px; padding:8px 14px;
     font-size:13px; font-weight:700; color:var(--ink);
@@ -143,7 +143,12 @@
   .task-check.checked svg{ opacity:1; }
   .task-check:active{ transform:scale(0.9); }
   .task-info{ flex:1; min-width:0; }
-  .task-name{ font-size:14.5px; font-weight:700; margin:0; color:var(--ink); }
+  .reorder{display:flex;flex-direction:column;gap:2px;margin-right:6px;flex-shrink:0}
+.mv{width:22px;height:18px;border:none;background:transparent;color:#9AA0A6;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:6px}
+.mv svg{width:16px;height:16px}
+.mv:disabled{opacity:.25;cursor:default}
+.mv:active:not(:disabled){background:rgba(0,0,0,.06)}
+.task-name{ font-size:14.5px; font-weight:700; margin:0; color:var(--ink); }
   .task-name.done{ text-decoration:line-through; color:var(--ink-faint); }
   .task-tag{ display:flex; align-items:center; flex-wrap:wrap; gap:3px 6px; margin-top:3px; }
   .task-tag .dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
@@ -159,7 +164,7 @@
   /* ---------- Progress screen ---------- */
   .chip-row{ display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:18px; scrollbar-width:none; }
   .chip-row::-webkit-scrollbar{ display:none; }
-  .chip{
+  .chip{text-transform:lowercase;
     flex-shrink:0; padding:9px 16px; border-radius:999px; background:var(--surface);
     font-size:13px; font-weight:700; color:var(--ink-soft); cursor:pointer;
     display:flex; align-items:center; gap:7px; transition:background .15s ease, color .15s ease;
@@ -172,7 +177,7 @@
   .detail-icon{ width:50px; height:50px; border-radius:15px; background:rgba(255,255,255,0.24); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .detail-icon svg{ width:25px; height:25px; }
   .detail-name{ font-size:17px; font-weight:800; margin:0; }
-  .detail-area{ font-size:11.5px; font-weight:700; color:rgba(255,255,255,.75); margin-top:2px; text-transform:uppercase; letter-spacing:.03em; }
+  .detail-area{ font-size:11.5px; font-weight:400; color:rgba(255,255,255,.75); margin-top:2px; text-transform:lowercase; }
   .detail-badge{ font-size:12px; font-weight:700; color:rgba(255,255,255,.85); margin-top:2px; }
 
   .week-row{ display:flex; justify-content:space-between; margin-bottom:16px; }
@@ -435,11 +440,11 @@
 
 // ÁREAS DA VIDA
 const AREAS = [
-  { id:'saude',        name:'Saúde',         hex:'#F4698A' },
-  { id:'financas',     name:'Finanças',      hex:'#2FB88F' },
-  { id:'hobbies',      name:'Hobbies',       hex:'#8B6EF2' },
-  { id:'estudos',      name:'Estudos',       hex:'#E3A82B' },
-  { id:'saude_mental', name:'Saúde Mental',  hex:'#4AC0B5' },
+  { id:'saude',        name:'saúde',         hex:'#F4698A' },
+  { id:'financas',     name:'finanças',      hex:'#2FB88F' },
+  { id:'hobbies',      name:'hobbies',       hex:'#8B6EF2' },
+  { id:'estudos',      name:'estudos',       hex:'#E3A82B' },
+  { id:'saude_mental', name:'saúde mental',  hex:'#4AC0B5' },
 ];
 
 // BLOCOS DE HORÁRIO DO DIA (genéricos por enquanto)
@@ -451,21 +456,22 @@ const BLOCKS = [
 
 // HÁBITOS — cada um pertence a uma área e a um bloco de horário
 const HABITS = [
-  { id:'exercicio',  name:'Caminhar 20 minutos', areaId:'saude', blockId:'manha',
+  { id:'exercicio',  name:'caminhar 20 minutos', areaId:'saude', blockId:'tarde',
+    frequency:'times', target:5, // aparece todo dia até bater 5x na semana
     icon:'<svg viewBox="0 0 24 24" fill="none"><circle cx="13" cy="4.5" r="1.8" fill="#fff"/><path d="M13 8.5L10.5 13L13.5 16L13 21M10.5 13L7.5 15M12.5 10.5L16 12.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-  { id:'academia',   name:'Ir na academia', areaId:'saude', blockId:'manha',
+  { id:'academia',   name:'ir na academia', areaId:'saude', blockId:'manha',
     frequency:'times', target:3, // aparece todo dia até bater 3x na semana (dom–sáb)
     icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M9 8.5C9 5.5 15 5.5 15 8.5" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="14.5" r="5.5" stroke="#fff" stroke-width="1.8"/></svg>' },
-  { id:'agua',       name:'2L de água',  areaId:'saude', blockId:'manha',
+  { id:'agua',       name:'2l de água',  areaId:'saude', blockId:'manha',
     icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 3C12 3 6 10.5 6 14.5C6 18.09 8.69 21 12 21C15.31 21 18 18.09 18 14.5C18 10.5 12 3 12 3Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/></svg>' },
-  { id:'leitura',    name:'Leitura',     areaId:'hobbies', blockId:'tarde',
+  { id:'leitura',    name:'leitura',     areaId:'hobbies', blockId:'tarde',
     icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 6C10.3 4.7 7.8 4 5 4V17C7.8 17 10.3 17.7 12 19M12 6C13.7 4.7 16.2 4 19 4V17C16.2 17 13.7 17.7 12 19M12 6V19" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
-  { id:'journaling', name:'Journaling',  areaId:'saude_mental', blockId:'noite',
+  { id:'journaling', name:'journaling',  areaId:'saude_mental', blockId:'noite',
     icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M5 20H8.5L18 10.5C18.8 9.7 18.8 8.4 18 7.6L17 6.6C16.2 5.8 14.9 5.8 14.1 6.6L4.6 16.1C4.2 16.5 4 17 4 17.6V20H5Z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><path d="M12.5 8L16.5 12" stroke="#fff" stroke-width="1.6"/></svg>' },
-  { id:'gastos',     name:'Acompanhar gastos', areaId:'financas', blockId:'tarde',
+  { id:'gastos',     name:'acompanhar gastos', areaId:'financas', blockId:'tarde',
     frequency:'weekly', dow:6, // 6 = sábado
     icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 4V20M8 7.5C8 7.5 9 6 12 6C15 6 16 7.8 16 9C16 12 8 11 8 14.5C8 16 9.5 17.5 12 17.5C15 17.5 16 16 16 16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>' },
-  { id:'compras',    name:'Sem compras impulsivas', areaId:'financas', blockId:'noite',
+  { id:'compras',    name:'sem compras impulsivas', areaId:'financas', blockId:'noite',
     icon:'<svg viewBox="0 0 24 24" fill="none"><path d="M6 8H18L17 20H7L6 8Z" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6C9 4.3 10.3 3 12 3C13.7 3 15 4.3 15 6V8" stroke="#fff" stroke-width="1.8"/><path d="M4 20L20 4" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>' },
 ];
 
@@ -477,7 +483,7 @@ const QUARTER_END   = new Date(2026, 11, 31); // 31 dez
 const GOALS = [
   { title:'melhorar minha saúde física', areaId:'saude', items:[
     'ir na academia 3x na semana.',
-    'fazer caminhadas diárias de, ao menos, 20 minutos.',
+    'caminhar ao menos 20 minutos, 5x na semana.',
     'meditar diariamente, ao menos, 5 minutos.',
     'comer uma fruta ao dia, seja fresca ou batida.',
   ]},
@@ -583,6 +589,21 @@ const STORE_KEY = 'habit_tracker_checks_v1';
 function loadChecks(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch(e){ return {}; } }
 function saveChecks(data){ localStorage.setItem(STORE_KEY, JSON.stringify(data)); }
 let checks = loadChecks();
+const ORDER_KEY = 'habit_tracker_order_v1';
+function loadOrder(){ try{ return JSON.parse(localStorage.getItem(ORDER_KEY)) || []; } catch(e){ return []; } }
+function orderedHabits(){
+  const o = loadOrder();
+  const idx = h => { const i = o.indexOf(h.id); return i<0 ? 1000+HABITS.indexOf(h) : i; };
+  return HABITS.slice().sort((a,b)=>idx(a)-idx(b));
+}
+function moveHabit(id, dir, visibleIds){
+  const i = visibleIds.indexOf(id), j = i+dir;
+  if(i<0 || j<0 || j>=visibleIds.length) return;
+  const all = orderedHabits().map(h=>h.id);
+  const a = all.indexOf(id), b = all.indexOf(visibleIds[j]);
+  all[a] = visibleIds[j]; all[b] = id;
+  try{ localStorage.setItem(ORDER_KEY, JSON.stringify(all)); }catch(e){}
+}
 
 /* ============ DATE HELPERS ============ */
 function toKey(d){ const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
@@ -706,7 +727,7 @@ function renderFilteredList(){
   const today = new Date();
   const todayKey = toKey(today);
   const dayChecks = checks[todayKey] || {};
-  const habitsInArea = HABITS.filter(h=>h.areaId===activeAreaFilter && isScheduledOn(h, today));
+  const habitsInArea = orderedHabits().filter(h=>h.areaId===activeAreaFilter && isScheduledOn(h, today));
 
   if(habitsInArea.length===0){
     const area = AREAS.find(a=>a.id===activeAreaFilter);
@@ -796,7 +817,7 @@ function renderBlocks(){
   const dayChecks = checks[key] || {};
 
   BLOCKS.forEach(block=>{
-    const blockHabits = HABITS.filter(h=>h.blockId===block.id && isScheduledOn(h, selectedDate));
+    const blockHabits = orderedHabits().filter(h=>h.blockId===block.id && isScheduledOn(h, selectedDate));
     if(blockHabits.length===0) return;
 
     const doneCount = blockHabits.filter(h=>dayChecks[h.id]).length;
@@ -807,12 +828,17 @@ function renderBlocks(){
     card.style.background = hexToRgba(dominantArea.hex, 0.12);
 
     let rowsHtml = '';
-    blockHabits.forEach(h=>{
+    const visIds = blockHabits.map(h=>h.id);
+    blockHabits.forEach((h,hi)=>{
       const area = areaOf(h);
       const isChecked = !!dayChecks[h.id];
       const streak = computeCurrentStreak(h.id);
       rowsHtml += `
         <div class="task-row">
+          <div class="reorder">
+            <button class="mv" data-id="${h.id}" data-dir="-1" data-block="${block.id}" ${hi===0?'disabled':''} aria-label="subir"><svg viewBox="0 0 24 24" fill="none"><path d="M6 15L12 9L18 15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="mv" data-id="${h.id}" data-dir="1" data-block="${block.id}" ${hi===blockHabits.length-1?'disabled':''} aria-label="descer"><svg viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
           <button class="task-check ${isChecked?'checked':''}" data-habit="${h.id}" style="${isChecked?`background:${area.hex};border-color:${area.hex}`:''}">
             <svg viewBox="0 0 24 24" fill="none"><path d="M5 13L9.5 17.5L19 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
@@ -841,6 +867,14 @@ function renderBlocks(){
     list.appendChild(card);
   });
 
+  list.querySelectorAll('.mv').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const bid = btn.dataset.block;
+      const ids = orderedHabits().filter(h=>h.blockId===bid && isScheduledOn(h, selectedDate)).map(h=>h.id);
+      moveHabit(btn.dataset.id, parseInt(btn.dataset.dir), ids);
+      renderBlocks();
+    });
+  });
   list.querySelectorAll('.task-check').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const habitId = btn.dataset.habit;
